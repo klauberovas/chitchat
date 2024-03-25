@@ -32,7 +32,10 @@ export interface BaseResult {
   status: string;
   result: (Channel | Message | Thread)[];
 }
-
+export interface Result {
+  status: string;
+  result: Message;
+}
 // interface MessageOrThread extends User {
 //   id: number;
 //   channelId: number;
