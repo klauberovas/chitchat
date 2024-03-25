@@ -1,19 +1,21 @@
 import './styles.css';
 import { BaseResult, Channel, Message, Thread } from './data-model.js';
 
-//Stáhnutí dat
-const channelResponse: Response = await fetch(
-  'http://localhost:4000/api/channels',
-);
-const channelData = (await channelResponse.json()) as BaseResult;
-const dataChanel = channelData.result as Channel[];
+//funkce FETCHDATA
+const fetchData = async (url: string): Promise<BaseResult> => {
+  const response: Response = await fetch(url);
+  return await response.json();
+};
 
-//získání url parametrů
+//získání URL parametrů
 const searchParams = new URLSearchParams(window.location.search);
 const channelParam = Number(searchParams.get('channel'));
 const messageParam: number = Number(searchParams.get('message'));
 
 //Channels
+const channelData = await fetchData('http://localhost:4000/api/channels');
+const dataChanel = channelData.result as Channel[];
+
 const channelAside: HTMLElement = document.createElement('aside');
 channelAside.classList.add('channel');
 channelAside.innerHTML = '<h2 class="column-head">Channels</h2>';
@@ -36,10 +38,9 @@ dataChanel.forEach((item) => {
 //-----------------------------------
 //MESSAGES
 //Stáhnutí zpráv podle channel params
-const messageResponse: Response = await fetch(
+const messageData = await fetchData(
   `http://localhost:4000/api/messages?filter=channelId:eq:${channelParam}`,
 );
-const messageData = (await messageResponse.json()) as BaseResult;
 const dataMessages = messageData.result as Message[];
 
 //Vytvoření mainu
@@ -64,7 +65,7 @@ const renderMessage = (messages: Message[]): void => {
 
     main.innerHTML += `
     <div class="message ${activeMessage}">
-          <img class="message-avatar" src="http://localhost:4000/assets/users/${user.avatarFilename}" alt="${user.name}" />
+          <img class="message-avatar" src="assets/users/${user.avatarFilename}" alt="${user.name}" />
           <div class="message-content">
             <div class="message-head">
               <div class="message-user">${user.name} - ${user.role}</div>
@@ -82,10 +83,9 @@ ${activeThreadMessage}
 //-------------------------------------------
 //RENDROVÁNÍ VLÁKEN
 //Stáhnutí dat podle message param
-const threadResponse: Response = await fetch(
+const threadData = await fetchData(
   `http://localhost:4000/api/thread-messages?filter=parentId:eq:${messageParam}`,
 );
-const threadData = (await threadResponse.json()) as BaseResult;
 const dataThreads = threadData.result as Thread[];
 
 //vytvoření <aside> thread
@@ -97,7 +97,7 @@ if (searchParams.has('message')) {
   console.log(searchParams);
   threadAside.innerHTML += `
   <div class="message">
-      <img class="message-avatar" src="http://localhost:4000/assets/users/${dataMessages[messageParam].user.avatarFilename}" alt="${dataMessages[messageParam].user.name}" />
+      <img class="message-avatar" src="assets/users/${dataMessages[messageParam].user.avatarFilename}" alt="${dataMessages[messageParam].user.name}" />
       <div class="message-content">
         <div class="message-head">
           <div class="message-user">${dataMessages[messageParam].user.name} - ${dataMessages[messageParam].user.role}</div>
@@ -122,7 +122,7 @@ const renderThread = (thread: Thread[]): void | null => {
 
       return (divThread.innerHTML += `
     <div class="message thread-message">
-          <img class="message-avatar" src="http://localhost:4000/assets/users/${user.avatarFilename}" alt=${user.name} />
+          <img class="message-avatar" src="assets/users/${user.avatarFilename}" alt=${user.name} />
           <div class="message-content">
             <div class="message-head">
               <div class="message-user">${user.name} - ${user.role}</div>
